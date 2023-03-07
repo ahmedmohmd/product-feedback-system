@@ -1,7 +1,12 @@
+//* Imports
 import cors from "cors";
 import express from "express";
-import feedbackRouter from "./routes/feedbacks";
+import commentsRouter from "./routes/comments.route";
+import feedbackRouter from "./routes/feedbacks.route";
+import notFoundRouter from "./routes/not-found.route";
+import connect from "./utils/database";
 
+//* Default Configurations
 const app = express();
 app.use(
   express.urlencoded({
@@ -9,7 +14,8 @@ app.use(
   })
 );
 app.use(express.json());
-// CORS
+
+//* CORS
 const ORIGINS: string[] = ["http://localhost:3000"];
 const corsOptions = {
   // origin: function (origin: any, callback: any) {
@@ -23,14 +29,15 @@ const corsOptions = {
   origin: "*",
 };
 
+//* Routes
 app.use(cors(corsOptions));
 app.use("/feedbacks", feedbackRouter);
-app.use("/", (_, res) => {
-  res.status(200).send("Hello from Feedbacks System!");
-});
-app.use((_, res) => {
-  res.status(404).send("Sorry, this page does not exist!");
-});
+app.use("/", commentsRouter);
+app.use(notFoundRouter);
 
+//* Server Running
 const PORT = 9000;
-app.listen(PORT, () => console.info(`listening on port: ${PORT}...`));
+connect().then(() => {
+  console.info("database connection established...");
+  app.listen(PORT, () => console.info(`listening on port: ${PORT}...`));
+});

@@ -1,5 +1,5 @@
 import express from "express";
-import feedbacksController from "../controllers/feedbacks";
+import feedbacksController from "../controllers/feedbacks.controller";
 const router = express.Router();
 
 router.get("/", feedbacksController.getFeedbacks);
