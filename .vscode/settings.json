@@ -18,5 +18,6 @@
     "titleBar.inactiveBackground": "#a435f099",
     "titleBar.inactiveForeground": "#e7e7e799"
   },
-  "peacock.color": "#a435f0"
+  "peacock.color": "#a435f0",
+  "cSpell.words": ["roadmap"]
 }
