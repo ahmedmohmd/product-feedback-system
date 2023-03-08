@@ -15,7 +15,9 @@ const getFeedbacks = async (_, res) => {
 const getSingleFeedback = async ({ params }, res) => {
   try {
     const { feedbackId } = params;
-    const targetFeedback = await Feedback.findById(feedbackId);
+    const targetFeedback = await Feedback.findById(feedbackId).populate(
+      "comments"
+    );
 
     if (targetFeedback) {
       return res.status(200).json(targetFeedback);

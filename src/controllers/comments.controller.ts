@@ -7,7 +7,7 @@ const getComments = async ({ params }, res) => {
 
     const comments = await Comment.find({
       feedback: feedbackId,
-    });
+    }).populate("owner");
 
     res.status(200).json(comments);
   } catch (error) {
@@ -25,7 +25,10 @@ const getSingleComment = async ({ params }, res) => {
     });
 
     if (!targetComment) {
-      return res.status(404).json({ message: "Comment not found!" });
+      return res
+        .status(404)
+        .json({ message: "Comment not found!" })
+        .populate("owner");
     }
 
     res.status(200).json(targetComment);
@@ -92,14 +95,13 @@ const deleteComment = async ({ params }, res) => {
     if (!targetComment) {
       return res.status(404).json({ message: "Comment not found!" });
     }
-    console.log(targetComment);
 
     await Comment.deleteOne({
       _id: commentId,
       feedback: feedbackId,
     });
 
-    res.status(201).json({
+    res.status(200).json({
       message: "comment is deleted successfully",
     });
   } catch (error) {

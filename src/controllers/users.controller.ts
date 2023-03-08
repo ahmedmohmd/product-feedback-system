@@ -1,0 +1,94 @@
+import bcrypt from "bcrypt";
+import User from "../models/user.model";
+
+const getUsers = async (_, res) => {
+  try {
+    const allUsers = await User.find({});
+
+    res.status(200).json(allUsers);
+  } catch (error) {
+    console.error("An Error Occurred", error);
+  }
+};
+
+const getSingleUser = async ({ params }, res) => {
+  try {
+    const { userId } = params;
+    const targetUser = await User.findById(userId);
+
+    if (!targetUser) {
+      return res.status(404).json({ message: "User not found!" });
+    }
+
+    res.status(200).json(targetUser);
+  } catch (error) {
+    console.error("An Error Occurred");
+  }
+};
+
+const postUser = async ({ body }, res) => {
+  try {
+    const { name, email, password } = body;
+    const hashedPassword = await bcrypt.hash(password, 12);
+
+    const newUser = await User.create({
+      name,
+      email,
+      password: hashedPassword,
+    });
+
+    res.status(201).json(newUser);
+  } catch (error) {
+    console.error("An Error Occurred", error);
+  }
+};
+
+const patchUser = async ({ body, params }, res) => {
+  try {
+    const { userId } = params;
+
+    const targetUser = await User.findById(userId);
+
+    if (!targetUser) {
+      return res.status(404).json({ message: "User not found!" });
+    }
+
+    for (let field in body) {
+      if (body[field]) {
+        targetUser[field] = body[field];
+      }
+    }
+
+    await targetUser.save();
+    res.status(201).json(targetUser);
+  } catch (error) {
+    console.error("An Error Occurred");
+  }
+};
+
+const deleteUser = async ({ params }, res) => {
+  try {
+    const { userId } = params;
+    const targetUser = await User.findById(userId);
+
+    if (!targetUser) {
+      return res.status(404).json({ message: "User not found!" });
+    }
+
+    User.deleteOne({
+      id: userId,
+    });
+
+    res.status(200).json({ message: "User deleted successfully" });
+  } catch (error) {
+    console.error("An Error Occurred");
+  }
+};
+
+export default {
+  getUsers,
+  getSingleUser,
+  postUser,
+  patchUser,
+  deleteUser,
+};

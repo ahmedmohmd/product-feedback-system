@@ -4,6 +4,7 @@ import express from "express";
 import commentsRouter from "./routes/comments.route";
 import feedbackRouter from "./routes/feedbacks.route";
 import notFoundRouter from "./routes/not-found.route";
+import usersRouter from "./routes/users.route";
 import connect from "./utils/database";
 
 //* Default Configurations
@@ -31,6 +32,7 @@ const corsOptions = {
 
 //* Routes
 app.use(cors(corsOptions));
+app.use("/users", usersRouter);
 app.use("/feedbacks", feedbackRouter);
 app.use("/", commentsRouter);
 app.use(notFoundRouter);

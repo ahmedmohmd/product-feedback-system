@@ -11,6 +11,11 @@ const commentSchema = new Schema(
       ref: "Feedback",
       required: true,
     },
+    author: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
   },
   {
     timestamps: true,
