@@ -1,3 +1,4 @@
+import bcrypt from "bcrypt";
 import { model, Schema } from "mongoose";
 import isEmail from "validator/lib/isEmail";
 
@@ -17,11 +18,12 @@ const userSchema = new Schema({
       },
       message: "Your Email is not valid!",
     },
+    unique: true,
   },
   password: {
     type: String,
     required: true,
-    minLength: 8,
+    minLength: 5,
   },
   comments: [
     {
@@ -38,5 +40,12 @@ const userSchema = new Schema({
     },
   ],
 });
+
+// userSchema.pre("save", async function (next) {
+//   const newPassword = await bcrypt.hash(this.password, 10);
+
+//   this.password = newPassword;
+//   next();
+// });
 
 export default model("User", userSchema);

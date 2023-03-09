@@ -1,27 +1,32 @@
 import Comment from "../models/comment.model";
 import Feedback from "../models/feedback.model";
 
-const getComments = async ({ params }, res) => {
+const getComments = async ({ params, session }, res) => {
   try {
     const { feedbackId } = params;
+    const { user } = session;
 
     const comments = await Comment.find({
       feedback: feedbackId,
-    }).populate("owner");
+      author: user.id,
+    }).populate("author", "name");
 
     res.status(200).json(comments);
   } catch (error) {
-    console.error("An error occurred!");
+    console.error("An error occurred!", error);
+    res.status(500).json({ message: "An Internal Server Error Occurred" });
   }
 };
 
-const getSingleComment = async ({ params }, res) => {
+const getSingleComment = async ({ params, session }, res) => {
   try {
     const { feedbackId, commentId } = params;
+    const { user } = session;
 
     const targetComment = await Comment.findOne({
       _id: commentId,
       feedback: feedbackId,
+      author: user.id,
     });
 
     if (!targetComment) {
@@ -33,16 +38,22 @@ const getSingleComment = async ({ params }, res) => {
 
     res.status(200).json(targetComment);
   } catch (error) {
-    console.error("An error occurred!");
+    console.error("An error occurred!", error);
+    res.status(500).json({ message: "An Internal Server Error Occurred" });
   }
 };
 
-const postComment = async ({ body, params }, res) => {
+const postComment = async ({ body, params, session }, res) => {
   try {
     const { content } = body;
     const { feedbackId } = params;
+    const { user } = session;
 
-    const newComment = await Comment.create({ content, feedback: feedbackId });
+    const newComment = await Comment.create({
+      content,
+      feedback: feedbackId,
+      author: user.id,
+    });
 
     await Feedback.findByIdAndUpdate(
       feedbackId,
@@ -52,17 +63,20 @@ const postComment = async ({ body, params }, res) => {
 
     res.status(201).json(newComment);
   } catch (error) {
-    console.error("An error occurred!");
+    console.error("An error occurred!", error);
+    res.status(500).json({ message: "An Internal Server Error Occurred" });
   }
 };
 
-const patchComment = async ({ body, params }, res) => {
+const patchComment = async ({ body, params, session }, res) => {
   try {
     const { feedbackId, commentId } = params;
+    const { user } = session;
 
     const targetComment = await Comment.findOne({
       _id: commentId,
       feedback: feedbackId,
+      author: user.id,
     });
 
     if (!targetComment) {
@@ -79,17 +93,20 @@ const patchComment = async ({ body, params }, res) => {
 
     res.status(201).json(targetComment);
   } catch (error) {
-    console.error("An error occurred!");
+    console.error("An error occurred!", error);
+    res.status(500).json({ message: "An Internal Server Error Occurred" });
   }
 };
 
-const deleteComment = async ({ params }, res) => {
+const deleteComment = async ({ params, session }, res) => {
   try {
     const { feedbackId, commentId } = params;
+    const { user } = session;
 
     const targetComment = await Comment.findOne({
       _id: commentId,
       feedback: feedbackId,
+      author: user.id,
     });
 
     if (!targetComment) {
@@ -105,7 +122,8 @@ const deleteComment = async ({ params }, res) => {
       message: "comment is deleted successfully",
     });
   } catch (error) {
-    console.error("An error occurred!");
+    console.error("An error occurred!", error);
+    res.status(500).json({ message: "An Internal Server Error Occurred" });
   }
 };
 

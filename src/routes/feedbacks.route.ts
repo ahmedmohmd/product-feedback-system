@@ -1,11 +1,12 @@
 import express from "express";
 import feedbacksController from "../controllers/feedbacks.controller";
+import auth from "../middlewares/auth.middware";
 const router = express.Router();
 
-router.get("/", feedbacksController.getFeedbacks);
-router.get("/:feedbackId", feedbacksController.getSingleFeedback);
-router.post("/", feedbacksController.postFeedback);
-router.patch("/:feedbackId", feedbacksController.patchFeedback);
-router.delete("/:feedbackId", feedbacksController.deleteFeedback);
+router.get("/", auth, feedbacksController.getFeedbacks);
+router.get("/:feedbackId", auth, feedbacksController.getSingleFeedback);
+router.post("/", auth, feedbacksController.postFeedback);
+router.patch("/:feedbackId", auth, feedbacksController.patchFeedback);
+router.delete("/:feedbackId", auth, feedbacksController.deleteFeedback);
 
 export default router;

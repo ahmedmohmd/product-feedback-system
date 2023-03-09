@@ -7,7 +7,8 @@ const getUsers = async (_, res) => {
 
     res.status(200).json(allUsers);
   } catch (error) {
-    console.error("An Error Occurred", error);
+    console.error("An error occurred!", error);
+    res.status(500).json({ message: "An Internal Server Error Occurred" });
   }
 };
 
@@ -22,14 +23,15 @@ const getSingleUser = async ({ params }, res) => {
 
     res.status(200).json(targetUser);
   } catch (error) {
-    console.error("An Error Occurred");
+    console.error("An error occurred!", error);
+    res.status(500).json({ message: "An Internal Server Error Occurred" });
   }
 };
 
 const postUser = async ({ body }, res) => {
   try {
     const { name, email, password } = body;
-    const hashedPassword = await bcrypt.hash(password, 12);
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = await User.create({
       name,
@@ -39,7 +41,8 @@ const postUser = async ({ body }, res) => {
 
     res.status(201).json(newUser);
   } catch (error) {
-    console.error("An Error Occurred", error);
+    console.error("An error occurred!", error);
+    res.status(500).json({ message: "An Internal Server Error Occurred" });
   }
 };
 
@@ -62,7 +65,8 @@ const patchUser = async ({ body, params }, res) => {
     await targetUser.save();
     res.status(201).json(targetUser);
   } catch (error) {
-    console.error("An Error Occurred");
+    console.error("An error occurred!", error);
+    res.status(500).json({ message: "An Internal Server Error Occurred" });
   }
 };
 
@@ -81,7 +85,8 @@ const deleteUser = async ({ params }, res) => {
 
     res.status(200).json({ message: "User deleted successfully" });
   } catch (error) {
-    console.error("An Error Occurred");
+    console.error("An error occurred!", error);
+    res.status(500).json({ message: "An Internal Server Error Occurred" });
   }
 };
 

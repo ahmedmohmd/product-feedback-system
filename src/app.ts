@@ -1,11 +1,23 @@
 //* Imports
 import cors from "cors";
 import express from "express";
+import session from "express-session";
+import authRouter from "./routes/auth.route";
 import commentsRouter from "./routes/comments.route";
 import feedbackRouter from "./routes/feedbacks.route";
 import notFoundRouter from "./routes/not-found.route";
 import usersRouter from "./routes/users.route";
 import connect from "./utils/database";
+const MongoDBStore = require("express-mongodb-session")(session);
+
+const store = new MongoDBStore({
+  uri: "mongodb://127.0.0.1:27017/feedback-system",
+  collection: "sessions",
+});
+
+store.on("error", function (error) {
+  console.error(error);
+});
 
 //* Default Configurations
 const app = express();
@@ -32,6 +44,20 @@ const corsOptions = {
 
 //* Routes
 app.use(cors(corsOptions));
+
+app.use(
+  require("express-session")({
+    secret: "Pythonista",
+    cookie: {
+      maxAge: 1000 * 60 * 60 * 24 * 7, // 1 week
+    },
+    store: store,
+    resave: true,
+    saveUninitialized: true,
+  })
+);
+
+app.use("/", authRouter);
 app.use("/users", usersRouter);
 app.use("/feedbacks", feedbackRouter);
 app.use("/", commentsRouter);

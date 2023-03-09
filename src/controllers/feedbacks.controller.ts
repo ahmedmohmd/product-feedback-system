@@ -1,23 +1,29 @@
 import Feedback from "../models/feedback.model";
 
-const getFeedbacks = async (_, res) => {
+const getFeedbacks = async ({ session }, res) => {
   try {
-    await Feedback.find({})
+    const { user } = session;
+
+    await Feedback.find({ owner: user.id })
       .populate("comments")
       .then((feedbacks) => {
         res.status(200).json(feedbacks);
       });
   } catch (error) {
-    console.error("There are an Error!");
+    console.error("An error occurred!", error);
+    res.status(500).json({ message: "An Internal Server Error Occurred" });
   }
 };
 
-const getSingleFeedback = async ({ params }, res) => {
+const getSingleFeedback = async ({ params, session }, res) => {
   try {
+    const { user } = session;
     const { feedbackId } = params;
-    const targetFeedback = await Feedback.findById(feedbackId).populate(
-      "comments"
-    );
+
+    const targetFeedback = await Feedback.findOne({
+      _id: feedbackId,
+      owner: user.id,
+    }).populate("comments");
 
     if (targetFeedback) {
       return res.status(200).json(targetFeedback);
@@ -25,32 +31,40 @@ const getSingleFeedback = async ({ params }, res) => {
 
     res.status(404).json({ message: "Feedback not found!" });
   } catch (error) {
-    console.error("There are an Error!");
+    console.error("An error occurred!", error);
+    res.status(500).json({ message: "An Internal Server Error Occurred" });
   }
 };
 
-const postFeedback = async ({ body }, res) => {
+const postFeedback = async ({ body, session }, res) => {
   try {
     const { title, description, roadmap, votes, categories } = body;
+
     const newFeedback = await Feedback.create({
       title,
       description,
       roadmap,
       votes,
       categories,
+      owner: session.user.id,
     });
 
     res.status(201).json(newFeedback);
   } catch (error) {
-    console.error("There are an Error!");
+    console.error("An error occurred!", error);
+    res.status(500).json({ message: "An Internal Server Error Occurred" });
   }
 };
 
-const patchFeedback = async ({ params, body }, res) => {
+const patchFeedback = async ({ params, body, session }, res) => {
   try {
+    const { user } = session;
     const { feedbackId } = params;
 
-    const targetFeedback = await Feedback.findById(feedbackId);
+    const targetFeedback = await Feedback.findOne({
+      _id: feedbackId,
+      owner: user.id,
+    });
 
     if (targetFeedback) {
       for (let feedback in body) {
@@ -66,14 +80,20 @@ const patchFeedback = async ({ params, body }, res) => {
 
     res.status(404).json({ message: "Feedback not found!" });
   } catch (error) {
-    console.error("There are an Error!");
+    console.error("An error occurred!", error);
+    res.status(500).json({ message: "An Internal Server Error Occurred" });
   }
 };
 
-const deleteFeedback = async ({ params }, res) => {
+const deleteFeedback = async ({ params, session }, res) => {
+  const { user } = session;
+
   try {
     const { feedbackId } = params;
-    const targetFeedback = await Feedback.findById(feedbackId);
+    const targetFeedback = await Feedback.findOne({
+      _id: feedbackId,
+      owner: user.id,
+    });
 
     if (targetFeedback) {
       await Feedback.deleteOne({
@@ -84,7 +104,8 @@ const deleteFeedback = async ({ params }, res) => {
 
     res.status(404).json({ message: "Feedback not found!" });
   } catch (error) {
-    console.error("There are an Error!");
+    console.error("An error occurred!", error);
+    res.status(500).json({ message: "An Internal Server Error Occurred" });
   }
 };
 
