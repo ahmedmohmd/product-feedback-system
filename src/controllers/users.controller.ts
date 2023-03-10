@@ -1,5 +1,6 @@
 import bcrypt from "bcrypt";
 import User from "../models/user.model";
+import passAuth from "../utils/pass-auth";
 
 const getUsers = async (_, res) => {
   try {
@@ -30,13 +31,14 @@ const getSingleUser = async ({ params }, res) => {
 
 const postUser = async ({ body }, res) => {
   try {
-    const { name, email, password } = body;
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const { name, email, password, role } = body;
+    const hashedPassword = await passAuth.encrypt(password);
 
     const newUser = await User.create({
       name,
       email,
       password: hashedPassword,
+      role,
     });
 
     res.status(201).json(newUser);
