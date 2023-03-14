@@ -5,5 +5,8 @@ const router = express.Router();
 router.post("/login", authController.postLogin);
 router.post("/logout", authController.postLogout);
 router.post("/reset", authController.postReset);
+router.get("/reset/:resetToken", authController.getNewPassword);
+router.post("/new-password", authController.postNewPassword);
+router.post("/register", authController.postRegister);
 
 export default router;

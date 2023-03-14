@@ -2,13 +2,14 @@
 import cors from "cors";
 import express from "express";
 import session from "express-session";
+import adminRouter from "./routes/admin.route";
 import authRouter from "./routes/auth.route";
 import commentsRouter from "./routes/comments.route";
 import feedbackRouter from "./routes/feedbacks.route";
 import notFoundRouter from "./routes/not-found.route";
+
 import usersRouter from "./routes/users.route";
 import connect from "./utils/database.util";
-import generate from "./utils/random-key.util";
 const MongoDBStore = require("express-mongodb-session")(session);
 
 const store = new MongoDBStore({
@@ -59,6 +60,7 @@ app.use(
 );
 
 app.use("/", authRouter);
+app.use("/admin", adminRouter);
 app.use("/users", usersRouter);
 app.use("/feedbacks", feedbackRouter);
 app.use("/", commentsRouter);

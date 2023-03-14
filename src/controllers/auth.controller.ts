@@ -1,3 +1,4 @@
+import { response } from "express";
 import config from "../../config/config";
 import User from "../models/user.model";
 import sendMail from "../services/email.service";
@@ -90,8 +91,80 @@ const postReset = async ({ body }, res) => {
   }
 };
 
+const getNewPassword = async ({ params }, res) => {
+  try {
+    const { resetToken } = params;
+    const targetUser = await User.findOne({
+      resetToken: resetToken,
+      resetTokenExpiration: {
+        $gt: Date.now(),
+      },
+    });
+
+    if (!targetUser) {
+      return res.status(404).json({
+        message: "Sorry, User does not exist, Or you entered invalid things.",
+      });
+    }
+
+    res.status(200).json({ userId: targetUser._id.toString(), resetToken });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal Server error" });
+  }
+};
+
+const postNewPassword = async ({ body }, res) => {
+  try {
+    const { userId, newPassword, resetToken } = body;
+    const targetUser = await User.findOne({
+      _id: userId,
+      resetToken: resetToken,
+      resetTokenExpiration: {
+        $gt: Date.now(),
+      },
+    });
+
+    if (!targetUser) {
+      return response.status(404).json({ message: "User does not exist!" });
+    }
+
+    targetUser.password = newPassword;
+    targetUser.resetToken = undefined;
+    targetUser.resetTokenExpiration = undefined;
+
+    await targetUser.save();
+    res.status(201).json({ message: "Your Password Update Successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal Server error!" });
+  }
+};
+
+const postRegister = async ({ body }, res) => {
+  try {
+    const { name, email, password, role } = body;
+    const hashedPassword = await passAuth.encrypt(password);
+
+    const newUser = await User.create({
+      name,
+      email,
+      password: hashedPassword,
+      role,
+    });
+
+    res.status(201).json(newUser);
+  } catch (error) {
+    console.error("An error occurred!", error);
+    res.status(500).json({ message: "An Internal Server Error Occurred" });
+  }
+};
+
 export default {
   postLogin,
   postLogout,
   postReset,
+  postNewPassword,
+  getNewPassword,
+  postRegister,
 };
