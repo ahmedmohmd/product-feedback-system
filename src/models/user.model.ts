@@ -1,7 +1,5 @@
-import bcrypt from "bcrypt";
 import { model, Schema } from "mongoose";
 import isEmail from "validator/lib/isEmail";
-import passAuth from "../utils/pass-auth";
 
 const userSchema = new Schema(
   {
@@ -54,9 +52,11 @@ const userSchema = new Schema(
 );
 
 // userSchema.pre("save", async function (next) {
-//   if (this.isModified("password")) {
-//     const newPassword = await passAuth.encrypt(this.password);
-//     this.password = newPassword;
+//   const user = this;
+
+//   if (user.isModified("password")) {
+//     const newPassword = await passAuth.encrypt(user.password);
+//     user.password = newPassword;
 //   }
 
 //   next();
