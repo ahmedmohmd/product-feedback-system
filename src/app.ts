@@ -1,5 +1,5 @@
 //* Imports
-import cors from "cors";
+const cors = require("cors");
 import express from "express";
 import session from "express-session";
 import adminRouter from "./routes/admin.route";
