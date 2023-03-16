@@ -1,7 +1,7 @@
 import Comment from "../models/comment.model";
 import Feedback from "../models/feedback.model";
 
-const getComments = async ({ params, session }, res) => {
+const getComments = async ({ params, session }, response, next) => {
   try {
     const { feedbackId } = params;
     const { user } = session;
@@ -11,14 +11,13 @@ const getComments = async ({ params, session }, res) => {
       author: user.id,
     }).populate("author", "name");
 
-    res.status(200).json(comments);
+    response.status(200).json(comments);
   } catch (error) {
-    console.error("An error occurred!", error);
-    res.status(500).json({ message: "An Internal Server Error Occurred" });
+    next(error);
   }
 };
 
-const getSingleComment = async ({ params, session }, res) => {
+const getSingleComment = async ({ params, session }, response, next) => {
   try {
     const { feedbackId, commentId } = params;
     const { user } = session;
@@ -30,20 +29,19 @@ const getSingleComment = async ({ params, session }, res) => {
     });
 
     if (!targetComment) {
-      return res
+      return response
         .status(404)
         .json({ message: "Comment not found!" })
         .populate("owner");
     }
 
-    res.status(200).json(targetComment);
+    response.status(200).json(targetComment);
   } catch (error) {
-    console.error("An error occurred!", error);
-    res.status(500).json({ message: "An Internal Server Error Occurred" });
+    next(error);
   }
 };
 
-const postComment = async ({ body, params, session }, res) => {
+const postComment = async ({ body, params, session }, response, next) => {
   try {
     const { content } = body;
     const { feedbackId } = params;
@@ -61,14 +59,13 @@ const postComment = async ({ body, params, session }, res) => {
       { new: true }
     );
 
-    res.status(201).json(newComment);
+    response.status(201).json(newComment);
   } catch (error) {
-    console.error("An error occurred!", error);
-    res.status(500).json({ message: "An Internal Server Error Occurred" });
+    next(error);
   }
 };
 
-const patchComment = async ({ body, params, session }, res) => {
+const patchComment = async ({ body, params, session }, response, next) => {
   try {
     const { feedbackId, commentId } = params;
     const { user } = session;
@@ -80,7 +77,7 @@ const patchComment = async ({ body, params, session }, res) => {
     });
 
     if (!targetComment) {
-      return res.status(404).json({ message: "Comment not found!" });
+      return response.status(404).json({ message: "Comment not found!" });
     }
 
     for (let field in body) {
@@ -91,14 +88,13 @@ const patchComment = async ({ body, params, session }, res) => {
 
     await targetComment.save();
 
-    res.status(201).json(targetComment);
+    response.status(201).json(targetComment);
   } catch (error) {
-    console.error("An error occurred!", error);
-    res.status(500).json({ message: "An Internal Server Error Occurred" });
+    next(error);
   }
 };
 
-const deleteComment = async ({ params, session }, res) => {
+const deleteComment = async ({ params, session }, response, next) => {
   try {
     const { feedbackId, commentId } = params;
     const { user } = session;
@@ -110,7 +106,7 @@ const deleteComment = async ({ params, session }, res) => {
     });
 
     if (!targetComment) {
-      return res.status(404).json({ message: "Comment not found!" });
+      return response.status(404).json({ message: "Comment not found!" });
     }
 
     await Comment.deleteOne({
@@ -118,12 +114,9 @@ const deleteComment = async ({ params, session }, res) => {
       feedback: feedbackId,
     });
 
-    res.status(200).json({
-      message: "comment is deleted successfully",
-    });
+    response.status(204).json({ message: "Comment deleted successfully" });
   } catch (error) {
-    console.error("An error occurred!", error);
-    res.status(500).json({ message: "An Internal Server Error Occurred" });
+    next(error);
   }
 };
 

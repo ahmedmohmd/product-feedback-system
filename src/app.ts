@@ -66,6 +66,20 @@ app.use("/feedbacks", feedbackRouter);
 app.use("/", commentsRouter);
 app.use(notFoundRouter);
 
+app.use((error, _, response, __) => {
+  const message = error.message || "Sorry, an Error Occurred!";
+  const status = error.statusCode || 500;
+  const stack = process.env.NODE_ENV === "development" ? error.stack : {};
+  const success = false;
+
+  response.status(status).json({
+    success,
+    status,
+    message,
+    stack,
+  });
+});
+
 //* Server Running
 const PORT = 9000;
 connect().then(() => {

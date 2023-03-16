@@ -1,4 +1,3 @@
-import { response } from "express";
 import isEmail from "validator/lib/isEmail";
 import isStrongPassword from "validator/lib/isStrongPassword";
 import config from "../../config/config";
@@ -8,20 +7,22 @@ import Consts from "../utils/consts.util";
 import passAuth from "../utils/pass-auth";
 import generate from "../utils/random-key.util";
 
-const postLogin = async ({ body, session }, res) => {
+const postLogin = async ({ body, session }, response, next) => {
   try {
     const { email, password } = body;
 
     const isValidEmail = isEmail(email.trim());
 
     if (!isValidEmail) {
-      return res.status(400).json({ message: "Sorry, email is incorrect" });
+      return response
+        .status(400)
+        .json({ message: "Sorry, email is incorrect" });
     }
 
     const targetUser = await User.findOne({ email: email });
 
     if (!targetUser) {
-      return res.status(404).json({ message: "User not found!" });
+      return response.status(404).json({ message: "User not found!" });
     }
 
     const isPasswordsValid = await passAuth.check(
@@ -30,7 +31,7 @@ const postLogin = async ({ body, session }, res) => {
     );
 
     if (!isPasswordsValid) {
-      return res.status(400).json({ message: "Password is not correct!" });
+      return response.status(400).json({ message: "Password is not correct!" });
     }
 
     session.user = {
@@ -45,38 +46,36 @@ const postLogin = async ({ body, session }, res) => {
 
     const { name: userName, email: userEmail } = targetUser;
 
-    res.status(200).json({ name: userName, email: userEmail });
+    response.status(200).json({ name: userName, email: userEmail });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Internal Server error" });
+    next(error);
   }
 };
 
-const postLogout = async ({ session }, res) => {
+const postLogout = async ({ session }, response, next) => {
   try {
     await session.destroy();
-    res.status(200).json({ message: "You have been logged out" });
+    response.status(200).json({ message: "You have been logged out" });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Internal Server error" });
+    next(error);
   }
 };
 
-const postReset = async ({ body }, res) => {
+const postReset = async ({ body }, response, next) => {
   try {
     const { email } = body;
 
     const isValidEmail = isEmail(email.trim());
 
     if (!isValidEmail) {
-      return res
+      return response
         .status(400)
         .json({ message: "Sorry, your email is incorrect" });
     }
 
     const targetUser = await User.findOne({ email: email });
     if (!targetUser) {
-      return res.status(404).json({ message: "Sorry, no user Found!" });
+      return response.status(404).json({ message: "Sorry, no user Found!" });
     }
 
     const token = await generate(Consts.RESET_TOKEN_LENGTH);
@@ -88,28 +87,27 @@ const postReset = async ({ body }, res) => {
     await targetUser.save();
 
     const mailOptions = {
-      from: "a7m3d.219@gmail.com",
+      from: process.env.SENDER_EMAIL,
       to: targetUser.email,
       subject: "Reset Password",
-      text: "test email",
+      text: "Reset Password",
       html: `
-        <p>
-          You can reset your password by clicking the following Link:
-          <a href="${config.baseUrl}/reset/${token}">Reset Password</a>
-        </p>
+        <div style="font-family: sans-serif; font-size: 18px; border-radius: 15px;">
+          <p>Hi <b>${targetUser.name}</b> 🙂, You can reset Your Email from Lin Down Below.</p> 
+          <a href="${config.baseUrl}/reset/${token}" style="background: #a855f7; padding: 10px; text-decoration: none; color: white;">Reset Password</a>
+        </div>
       `,
     };
 
     await sendMail(mailOptions);
 
-    res.status(200).json({ message: "Check you email address!" });
+    response.status(200).json({ message: "Check you email address!" });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Internal Server error" });
+    next(error);
   }
 };
 
-const getNewPassword = async ({ params }, res) => {
+const getNewPassword = async ({ params }, response, next) => {
   try {
     const { resetToken } = params;
     const targetUser = await User.findOne({
@@ -120,19 +118,20 @@ const getNewPassword = async ({ params }, res) => {
     });
 
     if (!targetUser) {
-      return res.status(404).json({
+      return response.status(404).json({
         message: "Sorry, User does not exist, Or you entered invalid things.",
       });
     }
 
-    res.status(200).json({ userId: targetUser._id.toString(), resetToken });
+    response
+      .status(200)
+      .json({ userId: targetUser._id.toString(), resetToken });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Internal Server error" });
+    next(error);
   }
 };
 
-const postNewPassword = async ({ body }, res) => {
+const postNewPassword = async ({ body }, response, next) => {
   try {
     const { userId, newPassword, resetToken } = body;
 
@@ -141,7 +140,7 @@ const postNewPassword = async ({ body }, res) => {
     });
 
     if (!isValidPassword) {
-      return res
+      return response
         .status(400)
         .json({ message: "Sorry,your password is incorrect" });
     }
@@ -163,14 +162,13 @@ const postNewPassword = async ({ body }, res) => {
     targetUser.resetTokenExpiration = undefined;
 
     await targetUser.save();
-    res.status(201).json({ message: "Your Password Update Successfully" });
+    response.status(201).json({ message: "Your Password Update Successfully" });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Internal Server error!" });
+    next(error);
   }
 };
 
-const postRegister = async ({ body }, res) => {
+const postRegister = async ({ body }, response, next) => {
   try {
     const { name, email, password, role } = body;
 
@@ -180,10 +178,18 @@ const postRegister = async ({ body }, res) => {
       minLength: Consts.PASSWORD_MIN_LENGTH,
     });
 
-    console.log(isValidPassword);
-
     if (!isValidPassword || !isValidEmail) {
-      return res.status(400).json({ message: "Sorry,data is incorrect" });
+      return response.status(400).json({ message: "Sorry,data is incorrect" });
+    }
+
+    const targetUser = await User.findOne({
+      email,
+    });
+
+    if (targetUser) {
+      return response
+        .status(409)
+        .json({ message: "Sorry, this email is already exists!" });
     }
 
     const hashedPassword = await passAuth.encrypt(password);
@@ -196,10 +202,9 @@ const postRegister = async ({ body }, res) => {
 
     const { name: userName, email: userEmail } = newUser;
 
-    res.status(201).json({ name: userName, email: userEmail });
+    response.status(201).json({ name: userName, email: userEmail });
   } catch (error) {
-    console.error("An error occurred!", error);
-    res.status(500).json({ message: "An Internal Server Error Occurred" });
+    next(error);
   }
 };
 

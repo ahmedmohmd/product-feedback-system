@@ -4,23 +4,22 @@ import User from "../models/user.model";
 import Consts from "../utils/consts.util";
 import passAuth from "../utils/pass-auth";
 
-const getSingleUser = async ({ params }, res) => {
+const getSingleUser = async ({ params }, response, next) => {
   try {
     const { userId } = params;
     const targetUser = await User.findById(userId);
 
     if (!targetUser) {
-      return res.status(404).json({ message: "User not found!" });
+      return response.status(404).json({ message: "User not found!" });
     }
 
-    res.status(200).json(targetUser);
+    response.status(200).json(targetUser);
   } catch (error) {
-    console.error("An error occurred!", error);
-    res.status(500).json({ message: "An Internal Server Error Occurred" });
+    next(error);
   }
 };
 
-const patchUser = async ({ body, params }, res) => {
+const patchUser = async ({ body, params }, response, next) => {
   try {
     const { userId } = params;
     const { email, password } = body;
@@ -32,17 +31,16 @@ const patchUser = async ({ body, params }, res) => {
     });
 
     if (!isValidPassword || !isValidEmail) {
-      return res.status(400).json({ message: "Sorry,data is incorrect" });
+      return response.status(400).json({ message: "Sorry,data is incorrect" });
     }
 
     const targetUser = await User.findById(userId);
-
     if (!targetUser) {
-      return res.status(404).json({ message: "User not found!" });
+      return response.status(404).json({ message: "Sorry, User not found!" });
     }
 
     for (let field in body) {
-      if (field === "password") {
+      if (field === "password" || field === "email") {
         continue;
       }
 
@@ -58,30 +56,28 @@ const patchUser = async ({ body, params }, res) => {
 
     const { name: userName, email: userEmail } = targetUser;
     await targetUser.save();
-    res.status(201).json({ name: userName, email: userEmail });
+    response.status(201).json({ name: userName, email: userEmail });
   } catch (error) {
-    console.error("An error occurred!", error);
-    res.status(500).json({ message: "An Internal Server Error Occurred" });
+    next(error);
   }
 };
 
-const deleteUser = async ({ params }, res) => {
+const deleteUser = async ({ params }, response, next) => {
   try {
     const { userId } = params;
     const targetUser = await User.findById(userId);
 
     if (!targetUser) {
-      return res.status(404).json({ message: "User not found!" });
+      return response.status(404).json({ message: "User not found!" });
     }
 
     User.deleteOne({
       id: userId,
     });
 
-    res.status(200).json({ message: "User deleted successfully" });
+    response.status(204).json({ message: "User deleted successfully" });
   } catch (error) {
-    console.error("An error occurred!", error);
-    res.status(500).json({ message: "An Internal Server Error Occurred" });
+    next(error);
   }
 };
 

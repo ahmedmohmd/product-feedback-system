@@ -1,0 +1,40 @@
+@base_url = http://localhost:9000
+@new_user = {"name": "Hammo Bika", "email": "bika@gmail.com", "password": "P@ssw3rd"}
+@reset_token = "blablablba"
+
+# Login
+# POST {{base_url}}/login HTTP/1.1
+# content-type: application/json
+
+# {
+#   "email": "ahmed@gmail.com",
+#   "password": "a7m3d1W##EEEW23"
+# }
+
+# Register new User
+# POST {{base_url}}/register
+# content-type: application/json
+
+# {{new_user}}
+
+# Logout
+# POST {{base_url}}/logout
+
+# Rest Password
+# POST {{base_url}}/reset
+# content-type: application/json
+
+# {
+#   "email": "ahmed@gmail.com"
+# }
+
+# GET {{base_url}}/reset/:token
+
+# POST {{base_url}}/new-password
+# content-type: application/json
+
+# {
+#   "userId": "example_userid",
+#   "newPassword": "example_password",
+#   "resetToken": "example_token",
+# }
