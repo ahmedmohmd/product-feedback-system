@@ -3,9 +3,11 @@ const cors = require("cors");
 import express from "express";
 import session from "express-session";
 import path from "path";
+import config from "../config/config";
 import adminRouter from "./routes/admin.route";
 import authRouter from "./routes/auth.route";
 import commentsRouter from "./routes/comments.route";
+import errorHanlderRouter from "./routes/error-handler.route";
 import feedbackRouter from "./routes/feedbacks.route";
 import notFoundRouter from "./routes/not-found.route";
 import usersRouter from "./routes/users.route";
@@ -14,7 +16,7 @@ import connect from "./utils/database.util";
 const MongoDBStore = require("express-mongodb-session")(session);
 
 const store = new MongoDBStore({
-  uri: "mongodb://127.0.0.1:27017/feedback-system",
+  uri: process.env.DATABASE_CONNECTION_URL,
   collection: "sessions",
 });
 
@@ -35,7 +37,7 @@ app.use(express.json());
 app.use("/images", express.static(path.join(__dirname, "images")));
 
 //* CORS
-const ORIGINS: string[] = ["http://localhost:3000"];
+const ORIGINS: string[] = [config.frontendUrl, "*"];
 const corsOptions = {
   // origin: function (origin: any, callback: any) {
   //   const isOrigin: boolean = ORIGINS.indexOf(origin) !== -1;
@@ -48,12 +50,12 @@ const corsOptions = {
   origin: "*",
 };
 
-//* Routes
 app.use(cors(corsOptions));
 
+// Sessions
 app.use(
   require("express-session")({
-    secret: "Pythonista",
+    secret: process.env.SESSION_SECRET_KEY,
     cookie: {
       maxAge: 1000 * 60 * 60 * 24 * 7, // 1 week
     },
@@ -72,21 +74,7 @@ app.use("/users", usersRouter);
 app.use("/feedbacks", feedbackRouter);
 app.use("/", commentsRouter);
 app.use(notFoundRouter);
-
-app.use((error, _, response, __) => {
-  const message = error.message || "Sorry, an Error Occurred!";
-  const status = error.statusCode || 500;
-  const stack = process.env.NODE_ENV === "development" ? error.stack : {};
-  const success = false;
-  console.log(error);
-
-  response.status(status).json({
-    success,
-    status,
-    message,
-    stack,
-  });
-});
+app.use(errorHanlderRouter);
 
 //* Server Running
 const PORT = 9000;

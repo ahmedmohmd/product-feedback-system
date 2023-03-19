@@ -5,6 +5,11 @@ import auth from "../middlewares/auth.middleware";
 const router = express.Router();
 
 router.get("/users", auth.authUser, auth.authAdmin, adminController.getUsers);
-router.get("/:userId", auth.authUser, auth.authAdmin, adminController.getUsers);
+router.delete(
+  "/:userId",
+  auth.authUser,
+  auth.authAdmin,
+  adminController.postDeleteUser
+);
 
 export default router;

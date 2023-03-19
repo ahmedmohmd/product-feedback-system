@@ -1,13 +1,23 @@
 import Feedback from "../models/feedback.model";
 
-const getFeedbacks = async ({ session }, response, next) => {
+const getFeedbacks = async ({ session, query }, response, next) => {
   try {
     const { user } = session;
+    const { page = 1 } = query;
+
+    const ITEMS_PER_PAGE = 10;
+    const countFeedbacks = await Feedback.countDocuments({ owner: user.id });
 
     await Feedback.find({ owner: user.id })
+      .skip(ITEMS_PER_PAGE * (page - 1))
+      .limit(ITEMS_PER_PAGE)
       .populate("comments")
       .then((feedbacks) => {
-        response.status(200).json(feedbacks);
+        response.status(200).json({
+          data: feedbacks,
+          next: page * ITEMS_PER_PAGE < countFeedbacks,
+          previous: page > 1,
+        });
       });
   } catch (error) {
     next(error);

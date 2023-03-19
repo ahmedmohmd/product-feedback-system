@@ -26,11 +26,22 @@ const postDeleteUser = async ({ params }, response, next) => {
   }
 };
 
-const getUsers = async (_, response, next) => {
+const getUsers = async ({ query }, response, next) => {
   try {
-    const allUsers = await User.find({});
+    const { page = 1 } = query;
 
-    response.status(200).json(allUsers);
+    const USERS_PER_PAGE = 10;
+    const countUsers = await User.countDocuments();
+
+    const allUsers = await User.find({})
+      .skip(USERS_PER_PAGE * (page - 1))
+      .limit(USERS_PER_PAGE);
+
+    response.status(200).json({
+      data: allUsers,
+      next: USERS_PER_PAGE * page < countUsers,
+      previous: page > 1,
+    });
   } catch (error) {
     next(error);
   }
