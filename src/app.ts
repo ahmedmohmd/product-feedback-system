@@ -2,13 +2,14 @@
 const cors = require("cors");
 import express from "express";
 import session from "express-session";
+import path from "path";
 import adminRouter from "./routes/admin.route";
 import authRouter from "./routes/auth.route";
 import commentsRouter from "./routes/comments.route";
 import feedbackRouter from "./routes/feedbacks.route";
 import notFoundRouter from "./routes/not-found.route";
-
 import usersRouter from "./routes/users.route";
+import upload from "./services/file-upload.service";
 import connect from "./utils/database.util";
 const MongoDBStore = require("express-mongodb-session")(session);
 
@@ -29,6 +30,9 @@ app.use(
   })
 );
 app.use(express.json());
+
+//* Surfing Static Files
+app.use("/images", express.static(path.join(__dirname, "images")));
 
 //* CORS
 const ORIGINS: string[] = ["http://localhost:3000"];
@@ -59,6 +63,9 @@ app.use(
   })
 );
 
+app.use(upload);
+
+//* Original Routes
 app.use("/", authRouter);
 app.use("/admin", adminRouter);
 app.use("/users", usersRouter);
@@ -71,6 +78,7 @@ app.use((error, _, response, __) => {
   const status = error.statusCode || 500;
   const stack = process.env.NODE_ENV === "development" ? error.stack : {};
   const success = false;
+  console.log(error);
 
   response.status(status).json({
     success,

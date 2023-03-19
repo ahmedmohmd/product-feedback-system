@@ -1,3 +1,4 @@
+import fs from "fs";
 import User from "../models/user.model";
 
 const postDeleteUser = async ({ params }, response, next) => {
@@ -12,6 +13,12 @@ const postDeleteUser = async ({ params }, response, next) => {
     User.deleteOne({
       id: userId,
     });
+
+    const isImageDefault = new RegExp("default.png$").test(targetUser.image);
+
+    if (!isImageDefault) {
+      fs.rmSync(targetUser.image);
+    }
 
     response.status(204).json({ message: "User deleted successfully" });
   } catch (error) {

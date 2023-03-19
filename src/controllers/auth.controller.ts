@@ -168,9 +168,10 @@ const postNewPassword = async ({ body }, response, next) => {
   }
 };
 
-const postRegister = async ({ body }, response, next) => {
+const postRegister = async ({ body, file }, response, next) => {
   try {
     const { name, email, password, role } = body;
+    const userImage = file;
 
     // validation
     const isValidEmail = isEmail(email.trim());
@@ -192,12 +193,12 @@ const postRegister = async ({ body }, response, next) => {
         .json({ message: "Sorry, this email is already exists!" });
     }
 
-    const hashedPassword = await passAuth.encrypt(password);
     const newUser = await User.create({
       name,
       email,
-      password: hashedPassword,
+      password,
       role,
+      image: userImage.path,
     });
 
     const { name: userName, email: userEmail } = newUser;

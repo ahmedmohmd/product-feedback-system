@@ -1,8 +1,7 @@
-import isEmail from "validator/lib/isEmail";
+import fs from "fs";
 import isStrongPassword from "validator/lib/isStrongPassword";
 import User from "../models/user.model";
 import Consts from "../utils/consts.util";
-import passAuth from "../utils/pass-auth";
 
 const getSingleUser = async ({ params }, response, next) => {
   try {
@@ -19,19 +18,23 @@ const getSingleUser = async ({ params }, response, next) => {
   }
 };
 
-const patchUser = async ({ body, params }, response, next) => {
+const patchUser = async ({ body, params, file }, response, next) => {
   try {
     const { userId } = params;
-    const { email, password } = body;
+    const { password } = body;
+    const userImage = file;
 
     // validation
-    const isValidEmail = isEmail(email.trim());
-    const isValidPassword = isStrongPassword(password, {
-      minLength: Consts.PASSWORD_MIN_LENGTH,
-    });
+    if (password) {
+      const isValidPassword = isStrongPassword(password, {
+        minLength: Consts.PASSWORD_MIN_LENGTH,
+      });
 
-    if (!isValidPassword || !isValidEmail) {
-      return response.status(400).json({ message: "Sorry,data is incorrect" });
+      if (!isValidPassword) {
+        return response
+          .status(400)
+          .json({ message: "Sorry,data is incorrect" });
+      }
     }
 
     const targetUser = await User.findById(userId);
@@ -40,7 +43,7 @@ const patchUser = async ({ body, params }, response, next) => {
     }
 
     for (let field in body) {
-      if (field === "password" || field === "email") {
+      if (field === "email") {
         continue;
       }
 
@@ -49,9 +52,14 @@ const patchUser = async ({ body, params }, response, next) => {
       }
     }
 
-    if (password) {
-      const newHashedPassword = await passAuth.encrypt(password);
-      targetUser.password = newHashedPassword;
+    if (userImage) {
+      const isImageDefault = new RegExp("default.png$").test(targetUser.image);
+
+      if (!isImageDefault) {
+        fs.rmSync(targetUser.image);
+      }
+
+      targetUser.image = userImage.path;
     }
 
     const { name: userName, email: userEmail } = targetUser;
@@ -74,6 +82,12 @@ const deleteUser = async ({ params }, response, next) => {
     User.deleteOne({
       id: userId,
     });
+
+    const isImageDefault = new RegExp("default.png$").test(targetUser.image);
+
+    if (!isImageDefault) {
+      fs.rmSync(targetUser.image);
+    }
 
     response.status(204).json({ message: "User deleted successfully" });
   } catch (error) {

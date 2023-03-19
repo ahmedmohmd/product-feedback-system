@@ -1,5 +1,6 @@
 import { model, Schema } from "mongoose";
 import isEmail from "validator/lib/isEmail";
+import passAuth from "../utils/pass-auth";
 
 const userSchema = new Schema(
   {
@@ -37,6 +38,10 @@ const userSchema = new Schema(
         ref: "Feedback",
       },
     ],
+    image: {
+      type: String,
+      default: "./src/images/default.png",
+    },
     role: {
       type: String,
       enum: ["admin", "user"],
@@ -51,15 +56,15 @@ const userSchema = new Schema(
   }
 );
 
-// userSchema.pre("save", async function (next) {
-//   const user = this;
+userSchema.pre("save", async function (next) {
+  const user = this;
 
-//   if (user.isModified("password")) {
-//     const newPassword = await passAuth.encrypt(user.password);
-//     user.password = newPassword;
-//   }
+  if (user.isModified("password")) {
+    const newPassword = await passAuth.encrypt(user.password);
+    user.password = newPassword;
+  }
 
-//   next();
-// });
+  next();
+});
 
 export default model("User", userSchema);
