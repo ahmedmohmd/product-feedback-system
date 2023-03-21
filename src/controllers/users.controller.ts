@@ -3,10 +3,10 @@ import isStrongPassword from "validator/lib/isStrongPassword";
 import User from "../models/user.model";
 import Consts from "../utils/consts.util";
 
-const getSingleUser = async ({ params }, response, next) => {
+const getSingleUser = async ({ session }, response, next) => {
   try {
-    const { userId } = params;
-    const targetUser = await User.findById(userId);
+    const { user } = session;
+    const targetUser = await User.findById(user.id);
 
     if (!targetUser) {
       return response.status(404).json({ message: "User not found!" });
@@ -18,9 +18,9 @@ const getSingleUser = async ({ params }, response, next) => {
   }
 };
 
-const patchUser = async ({ body, params, file }, response, next) => {
+const patchUser = async ({ body, session, file }, response, next) => {
   try {
-    const { userId } = params;
+    const { user } = session;
     const { password } = body;
     const userImage = file;
 
@@ -37,7 +37,7 @@ const patchUser = async ({ body, params, file }, response, next) => {
       }
     }
 
-    const targetUser = await User.findById(userId);
+    const targetUser = await User.findById(user.id);
     if (!targetUser) {
       return response.status(404).json({ message: "Sorry, User not found!" });
     }
@@ -70,17 +70,17 @@ const patchUser = async ({ body, params, file }, response, next) => {
   }
 };
 
-const deleteUser = async ({ params }, response, next) => {
+const deleteUser = async ({ session }, response, next) => {
   try {
-    const { userId } = params;
-    const targetUser = await User.findById(userId);
+    const { user } = session;
+    const targetUser = await User.findById(user.id);
 
     if (!targetUser) {
       return response.status(404).json({ message: "User not found!" });
     }
 
-    User.deleteOne({
-      id: userId,
+    await User.deleteOne({
+      _id: user.id,
     });
 
     const isImageDefault = new RegExp("default.png$").test(targetUser.image);

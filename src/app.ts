@@ -70,7 +70,7 @@ app.use(upload);
 //* Original Routes
 app.use("/", authRouter);
 app.use("/admin", adminRouter);
-app.use("/users", usersRouter);
+app.use("/user", usersRouter);
 app.use("/feedbacks", feedbackRouter);
 app.use("/", commentsRouter);
 app.use(notFoundRouter);

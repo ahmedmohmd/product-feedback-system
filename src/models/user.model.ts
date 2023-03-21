@@ -1,6 +1,8 @@
 import { model, Schema } from "mongoose";
 import isEmail from "validator/lib/isEmail";
 import passAuth from "../utils/pass-auth";
+import Comment from "./comment.model";
+import Feedback from "./feedback.model";
 
 const userSchema = new Schema(
   {
@@ -65,6 +67,24 @@ userSchema.pre("save", async function (next) {
   }
 
   next();
+});
+
+userSchema.pre("deleteOne", async function (next) {
+  const user = this.getQuery();
+
+  try {
+    await Feedback.deleteMany({
+      owner: user._id,
+    });
+
+    await Comment.deleteMany({
+      author: user._id,
+    });
+
+    return next();
+  } catch (error: any) {
+    next(error);
+  }
 });
 
 export default model("User", userSchema);

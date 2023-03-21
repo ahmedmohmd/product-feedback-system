@@ -1,3 +1,4 @@
+import { validationResult } from "express";
 import isEmail from "validator/lib/isEmail";
 import isStrongPassword from "validator/lib/isStrongPassword";
 import config from "../../config/config";
@@ -168,19 +169,18 @@ const postNewPassword = async ({ body }, response, next) => {
   }
 };
 
-const postRegister = async ({ body, file }, response, next) => {
+const postRegister = async (request, response, next) => {
   try {
+    const { body, file } = request;
     const { name, email, password, role } = body;
     const userImage = file;
 
     // validation
+    const errors = validationResult(request);
     const isValidEmail = isEmail(email.trim());
-    const isValidPassword = isStrongPassword(password, {
-      minLength: Consts.PASSWORD_MIN_LENGTH,
-    });
 
-    if (!isValidPassword || !isValidEmail) {
-      return response.status(400).json({ message: "Sorry,data is incorrect" });
+    if (!errors.isEmpty()) {
+      return response.status(400).json({ errors: errors.array() });
     }
 
     const targetUser = await User.findOne({

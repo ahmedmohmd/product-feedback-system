@@ -1,4 +1,5 @@
 import { model, Schema } from "mongoose";
+import Comment from "./comment.model";
 
 const feedbackSchema = new Schema(
   {
@@ -42,5 +43,19 @@ const feedbackSchema = new Schema(
     timestamps: true,
   }
 );
+
+feedbackSchema.pre("deleteMany", async function (next) {
+  const feedback = this.getQuery();
+
+  try {
+    await Comment.deleteMany({
+      feedback: feedback._id,
+    });
+
+    return next();
+  } catch (error: any) {
+    next(error);
+  }
+});
 
 export default model("Feedback", feedbackSchema);
