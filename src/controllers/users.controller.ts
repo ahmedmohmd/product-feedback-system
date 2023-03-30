@@ -1,7 +1,7 @@
+import { validationResult } from "express-validator";
 import fs from "fs";
 import isStrongPassword from "validator/lib/isStrongPassword";
 import User from "../models/user.model";
-import Consts from "../utils/consts.util";
 
 const getSingleUser = async ({ session }, response, next) => {
   try {
@@ -18,23 +18,16 @@ const getSingleUser = async ({ session }, response, next) => {
   }
 };
 
-const patchUser = async ({ body, session, file }, response, next) => {
+const patchUser = async (request, response, next) => {
   try {
-    const { user } = session;
-    const { password } = body;
-    const userImage = file;
+    const { user } = request.session;
+    const userImage = request.file;
 
     // validation
-    if (password) {
-      const isValidPassword = isStrongPassword(password, {
-        minLength: Consts.PASSWORD_MIN_LENGTH,
-      });
+    const errors = validationResult(request);
 
-      if (!isValidPassword) {
-        return response
-          .status(400)
-          .json({ message: "Sorry,data is incorrect" });
-      }
+    if (!errors.isEmpty()) {
+      return response.status(400).json({ errors: errors.array() });
     }
 
     const targetUser = await User.findById(user.id);
@@ -42,13 +35,13 @@ const patchUser = async ({ body, session, file }, response, next) => {
       return response.status(404).json({ message: "Sorry, User not found!" });
     }
 
-    for (let field in body) {
+    for (let field in request.body) {
       if (field === "email") {
         continue;
       }
 
-      if (body[field]) {
-        targetUser[field] = body[field];
+      if (request.body[field]) {
+        targetUser[field] = request.body[field];
       }
     }
 

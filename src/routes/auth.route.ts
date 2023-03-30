@@ -1,15 +1,13 @@
 import express from "express";
 import { body } from "express-validator";
 import authController from "../controllers/auth.controller";
+import validator from "../middlewares/validate.middleware";
 const router = express.Router();
 
 router.post(
   "/login",
-  body("email").trim().isEmail(),
-  body("password").isStrongPassword().isLength({
-    max: 15,
-    min: 8,
-  }),
+  validator.validateEmail(),
+  validator.validatePassword(),
   authController.postLogin
 );
 router.post("/logout", authController.postLogout);
@@ -17,19 +15,13 @@ router.post("/reset", body("email").trim().isEmail(), authController.postReset);
 router.get("/reset/:resetToken", authController.getNewPassword);
 router.post(
   "/new-password",
-  body("newPassword").isStrongPassword().isLength({
-    max: 15,
-    min: 8,
-  }),
+  validator.validatePassword("newPassword"),
   authController.postNewPassword
 );
 router.post(
   "/register",
-  body("email").trim().isEmail(),
-  body("password").isStrongPassword().isLength({
-    max: 15,
-    min: 8,
-  }),
+  validator.validateEmail(true),
+  validator.validatePassword(),
   authController.postRegister
 );
 

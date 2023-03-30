@@ -1,6 +1,4 @@
-import { validationResult } from "express";
-import isEmail from "validator/lib/isEmail";
-import isStrongPassword from "validator/lib/isStrongPassword";
+import { validationResult } from "express-validator";
 import config from "../../config/config";
 import User from "../models/user.model";
 import sendMail from "../services/email.service";
@@ -8,16 +6,16 @@ import Consts from "../utils/consts.util";
 import passAuth from "../utils/pass-auth";
 import generate from "../utils/random-key.util";
 
-const postLogin = async ({ body, session }, response, next) => {
+const postLogin = async (request, response, next) => {
   try {
+    const { body, session } = request;
     const { email, password } = body;
 
-    const isValidEmail = isEmail(email.trim());
+    // validation
+    const errors = validationResult(request);
 
-    if (!isValidEmail) {
-      return response
-        .status(400)
-        .json({ message: "Sorry, email is incorrect" });
+    if (!errors.isEmpty()) {
+      return response.status(400).json({ errors: errors.array() });
     }
 
     const targetUser = await User.findOne({ email: email });
@@ -45,9 +43,11 @@ const postLogin = async ({ body, session }, response, next) => {
     session.isLoggedIn = true;
     await session.save();
 
-    const { name: userName, email: userEmail } = targetUser;
+    const { name: userName, email: userEmail, image: userImage } = targetUser;
 
-    response.status(200).json({ name: userName, email: userEmail });
+    response
+      .status(200)
+      .json({ name: userName, email: userEmail, image: userImage });
   } catch (error) {
     next(error);
   }
@@ -62,19 +62,19 @@ const postLogout = async ({ session }, response, next) => {
   }
 };
 
-const postReset = async ({ body }, response, next) => {
+const postReset = async (request, response, next) => {
   try {
-    const { email } = body;
+    const { email } = request.body;
 
-    const isValidEmail = isEmail(email.trim());
+    // validation
+    const errors = validationResult(request);
 
-    if (!isValidEmail) {
-      return response
-        .status(400)
-        .json({ message: "Sorry, your email is incorrect" });
+    if (!errors.isEmpty()) {
+      return response.status(400).json({ errors: errors.array() });
     }
 
     const targetUser = await User.findOne({ email: email });
+
     if (!targetUser) {
       return response.status(404).json({ message: "Sorry, no user Found!" });
     }
@@ -94,7 +94,7 @@ const postReset = async ({ body }, response, next) => {
       text: "Reset Password",
       html: `
         <div style="font-family: sans-serif; font-size: 18px; border-radius: 15px;">
-          <p>Hi <b>${targetUser.name}</b> 🙂, You can reset Your Email from Lin Down Below.</p> 
+          <p>Hi <b>${targetUser.name}</b> 🙂, You can reset Your Email from Link Down Below.</p> 
           <a href="${config.baseUrl}/reset/${token}" style="background: #a855f7; padding: 10px; text-decoration: none; color: white;">Reset Password</a>
         </div>
       `,
@@ -132,18 +132,15 @@ const getNewPassword = async ({ params }, response, next) => {
   }
 };
 
-const postNewPassword = async ({ body }, response, next) => {
+const postNewPassword = async (request, response, next) => {
   try {
-    const { userId, newPassword, resetToken } = body;
+    const { userId, newPassword, resetToken } = request.body;
 
-    const isValidPassword = isStrongPassword(newPassword, {
-      minLength: Consts.PASSWORD_MIN_LENGTH,
-    });
+    // validation
+    const errors = validationResult(request);
 
-    if (!isValidPassword) {
-      return response
-        .status(400)
-        .json({ message: "Sorry,your password is incorrect" });
+    if (!errors.isEmpty()) {
+      return response.status(400).json({ errors: errors.array() });
     }
 
     const targetUser = await User.findOne({
@@ -177,20 +174,9 @@ const postRegister = async (request, response, next) => {
 
     // validation
     const errors = validationResult(request);
-    const isValidEmail = isEmail(email.trim());
 
     if (!errors.isEmpty()) {
       return response.status(400).json({ errors: errors.array() });
-    }
-
-    const targetUser = await User.findOne({
-      email,
-    });
-
-    if (targetUser) {
-      return response
-        .status(409)
-        .json({ message: "Sorry, this email is already exists!" });
     }
 
     const newUser = await User.create({

@@ -9,6 +9,7 @@ import authRouter from "./routes/auth.route";
 import commentsRouter from "./routes/comments.route";
 import errorHanlderRouter from "./routes/error-handler.route";
 import feedbackRouter from "./routes/feedbacks.route";
+import homeRouter from "./routes/home.route";
 import notFoundRouter from "./routes/not-found.route";
 import usersRouter from "./routes/users.route";
 import upload from "./services/file-upload.service";
@@ -68,7 +69,8 @@ app.use(
 app.use(upload);
 
 //* Original Routes
-app.use("/", authRouter);
+app.use("/", homeRouter);
+app.use("/auth", authRouter);
 app.use("/admin", adminRouter);
 app.use("/user", usersRouter);
 app.use("/feedbacks", feedbackRouter);
