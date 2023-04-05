@@ -47,13 +47,15 @@ const getSingleFeedback = async ({ params, session }, response, next) => {
 const postFeedback = async ({ body, session }, response, next) => {
   try {
     const { title, description, roadmap, votes, categories } = body;
+    const newTags = categories;
+    newTags.push("All");
 
     const newFeedback = await Feedback.create({
       title,
       description,
       roadmap,
       votes,
-      categories,
+      categories: newTags,
       owner: session.user.id,
     });
 

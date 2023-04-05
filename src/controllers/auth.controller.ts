@@ -184,12 +184,14 @@ const postRegister = async (request, response, next) => {
       email,
       password,
       role,
-      image: userImage.path,
+      image: `${config.baseUrl}/images/${userImage.originalname}`,
     });
 
-    const { name: userName, email: userEmail } = newUser;
+    const { name: userName, email: userEmail, image: usrImage } = newUser;
 
-    response.status(201).json({ name: userName, email: userEmail });
+    response
+      .status(201)
+      .json({ name: userName, email: userEmail, image: usrImage });
   } catch (error) {
     next(error);
   }
