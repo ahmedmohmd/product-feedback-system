@@ -14,16 +14,6 @@ import notFoundRouter from "./routes/not-found.route";
 import usersRouter from "./routes/users.route";
 import upload from "./services/file-upload.service";
 import connect from "./utils/database.util";
-// const MongoDBStore = require("express-mongodb-session")(session);
-
-// const store = new MongoDBStore({
-//   uri: process.env.DATABASE_CONNECTION_URL,
-//   collection: "sessions",
-// });
-
-// store.on("error", function (error) {
-//   console.error(error);
-// });
 
 //* Default Configurations
 const app = express();
@@ -52,19 +42,6 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-
-// Sessions
-// app.use(
-//   require("express-session")({
-//     secret: process.env.SESSION_SECRET_KEY,
-//     cookie: {
-//       maxAge: 1000 * 60 * 60 * 24 * 7, // 1 week
-//     },
-//     store: store,
-//     resave: true,
-//     saveUninitialized: true,
-//   })
-// );
 
 app.use(upload);
 
