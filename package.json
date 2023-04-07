@@ -1,7 +1,7 @@
 {
   "name": "product-feedback-app",
   "version": "1.0.0",
-  "main": "app.ts",
+  "main": "./src/app.ts",
   "license": "MIT",
   "scripts": {
     "dev": "nodemon ./src/app.ts"
