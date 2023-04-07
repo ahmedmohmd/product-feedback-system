@@ -42,7 +42,7 @@ const postLogin = async (request, response, next) => {
         image: targetUser.image,
         role: targetUser.role,
       },
-      "pythonista",
+      process.env.JWT_SECRET || "pYtHoNisTa",
       {
         expiresIn: "1h",
       }

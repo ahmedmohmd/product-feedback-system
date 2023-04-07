@@ -9,10 +9,13 @@ const authUser = async (request, res, next) => {
     }
 
     const token = authHeader.split(" ")[1];
-    const decodedToken = await jwt.verify(token, "pythonista");
-    console.log(decodedToken);
+    const decodedToken = await jwt.verify(
+      token,
+      process.env.JWT_SECRET || "pYtHoNisTa"
+    );
 
     request.user = decodedToken;
+
     next();
   } catch (error) {
     next(error);
