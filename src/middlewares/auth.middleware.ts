@@ -1,15 +1,26 @@
-const authUser = ({ session }, res, next) => {
-  const isAuthenticated = session.isLoggedIn;
+import jwt from "jsonwebtoken";
 
-  if (!isAuthenticated) {
-    return res.status(403).json({ message: "Sorry, you are not logged in!" });
+const authUser = async (request, res, next) => {
+  try {
+    const authHeader = request.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(403).json({ message: "Sorry, you are not logged in!" });
+    }
+
+    const token = authHeader.split(" ")[1];
+    const decodedToken = await jwt.verify(token, "pythonista");
+    console.log(decodedToken);
+
+    request.user = decodedToken;
+    next();
+  } catch (error) {
+    next(error);
   }
-
-  next();
 };
 
-const authAdmin = ({ session }, res, next) => {
-  const user = session.uer;
+const authAdmin = (request, res, next) => {
+  const user = request.user;
   const isAdmin = user.role === "admin";
 
   if (!isAdmin) {

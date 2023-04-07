@@ -17,10 +17,9 @@ const getComments = async ({ params, session }, response, next) => {
   }
 };
 
-const getSingleComment = async ({ params, session }, response, next) => {
+const getSingleComment = async ({ params, user }, response, next) => {
   try {
     const { feedbackId, commentId } = params;
-    const { user } = session;
 
     const targetComment = await Comment.findOne({
       _id: commentId,
@@ -41,11 +40,10 @@ const getSingleComment = async ({ params, session }, response, next) => {
   }
 };
 
-const postComment = async ({ body, params, session }, response, next) => {
+const postComment = async ({ body, params, user }, response, next) => {
   try {
     const { content } = body;
     const { feedbackId } = params;
-    const { user } = session;
 
     const newComment = await Comment.create({
       content,
@@ -65,10 +63,9 @@ const postComment = async ({ body, params, session }, response, next) => {
   }
 };
 
-const patchComment = async ({ body, params, session }, response, next) => {
+const patchComment = async ({ body, params, user }, response, next) => {
   try {
     const { feedbackId, commentId } = params;
-    const { user } = session;
 
     const targetComment = await Comment.findOne({
       _id: commentId,
@@ -94,10 +91,9 @@ const patchComment = async ({ body, params, session }, response, next) => {
   }
 };
 
-const deleteComment = async ({ params, session }, response, next) => {
+const deleteComment = async ({ params, user }, response, next) => {
   try {
     const { feedbackId, commentId } = params;
-    const { user } = session;
 
     const targetComment = await Comment.findOne({
       _id: commentId,

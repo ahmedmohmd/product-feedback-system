@@ -3,9 +3,8 @@ import fs from "fs";
 import isStrongPassword from "validator/lib/isStrongPassword";
 import User from "../models/user.model";
 
-const getSingleUser = async ({ session }, response, next) => {
+const getSingleUser = async ({ user }, response, next) => {
   try {
-    const { user } = session;
     const targetUser = await User.findById(user.id);
 
     if (!targetUser) {
@@ -20,7 +19,7 @@ const getSingleUser = async ({ session }, response, next) => {
 
 const patchUser = async (request, response, next) => {
   try {
-    const { user } = request.session;
+    const user = request.user;
     const userImage = request.file;
 
     // validation
@@ -63,9 +62,8 @@ const patchUser = async (request, response, next) => {
   }
 };
 
-const deleteUser = async ({ session }, response, next) => {
+const deleteUser = async ({ user }, response, next) => {
   try {
-    const { user } = session;
     const targetUser = await User.findById(user.id);
 
     if (!targetUser) {

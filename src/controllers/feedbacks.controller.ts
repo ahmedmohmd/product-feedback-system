@@ -1,8 +1,7 @@
 import Feedback from "../models/feedback.model";
 
-const getFeedbacks = async ({ session, query }, response, next) => {
+const getFeedbacks = async ({ user, query }, response, next) => {
   try {
-    const { user } = session;
     const { page = 1 } = query;
 
     const ITEMS_PER_PAGE = 10;
@@ -44,7 +43,7 @@ const getSingleFeedback = async ({ params, session }, response, next) => {
   }
 };
 
-const postFeedback = async ({ body, session }, response, next) => {
+const postFeedback = async ({ body, user }, response, next) => {
   try {
     const { title, description, roadmap, votes, categories } = body;
     const newTags = categories;
@@ -56,7 +55,7 @@ const postFeedback = async ({ body, session }, response, next) => {
       roadmap,
       votes,
       categories: newTags,
-      owner: session.user.id,
+      owner: user.id,
     });
 
     response.status(201).json(newFeedback);
@@ -65,9 +64,8 @@ const postFeedback = async ({ body, session }, response, next) => {
   }
 };
 
-const patchFeedback = async ({ params, body, session }, response, next) => {
+const patchFeedback = async ({ params, body, user }, response, next) => {
   try {
-    const { user } = session;
     const { feedbackId } = params;
 
     const targetFeedback = await Feedback.findOne({
@@ -93,9 +91,7 @@ const patchFeedback = async ({ params, body, session }, response, next) => {
   }
 };
 
-const deleteFeedback = async ({ params, session }, response, next) => {
-  const { user } = session;
-
+const deleteFeedback = async ({ params, user }, response, next) => {
   try {
     const { feedbackId } = params;
     const targetFeedback = await Feedback.findOne({

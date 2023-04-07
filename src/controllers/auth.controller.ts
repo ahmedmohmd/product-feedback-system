@@ -1,4 +1,5 @@
 import { validationResult } from "express-validator";
+import jwt from "jsonwebtoken";
 import config from "../../config/config";
 import User from "../models/user.model";
 import sendMail from "../services/email.service";
@@ -8,7 +9,7 @@ import generate from "../utils/random-key.util";
 
 const postLogin = async (request, response, next) => {
   try {
-    const { body, session } = request;
+    const { body } = request;
     const { email, password } = body;
 
     // validation
@@ -33,21 +34,21 @@ const postLogin = async (request, response, next) => {
       return response.status(400).json({ message: "Password is not correct!" });
     }
 
-    session.user = {
-      id: targetUser._id,
-      name: targetUser.name,
-      email: targetUser.email,
-      role: targetUser.role,
-    };
+    const token = await jwt.sign(
+      {
+        id: targetUser._id,
+        name: targetUser.name,
+        email: targetUser.email,
+        image: targetUser.image,
+        role: targetUser.role,
+      },
+      "pythonista",
+      {
+        expiresIn: "1h",
+      }
+    );
 
-    session.isLoggedIn = true;
-    await session.save();
-
-    const { name: userName, email: userEmail, image: userImage } = targetUser;
-
-    response
-      .status(200)
-      .json({ name: userName, email: userEmail, image: userImage });
+    response.status(200).json({ token });
   } catch (error) {
     next(error);
   }
