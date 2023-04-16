@@ -1,6 +1,8 @@
 import { validationResult } from "express-validator";
 import fs from "fs";
+import path from "path";
 import isStrongPassword from "validator/lib/isStrongPassword";
+import config from "../../config/config";
 import User from "../models/user.model";
 
 const getSingleUser = async ({ user }, response, next) => {
@@ -21,6 +23,8 @@ const patchUser = async (request, response, next) => {
   try {
     const user = request.user;
     const userImage = request.file;
+
+    console.log(request.body);
 
     // validation
     const errors = validationResult(request);
@@ -44,19 +48,31 @@ const patchUser = async (request, response, next) => {
       }
     }
 
-    if (userImage) {
-      const isImageDefault = new RegExp("default.png$").test(targetUser.image);
+    if (userImage && userImage !== "undefined") {
+      // const isImageDefault = new RegExp("default.png$").test(targetUser.image);
 
-      if (!isImageDefault) {
-        fs.rmSync(targetUser.image);
-      }
+      // if (!isImageDefault && targetUser.image.split("/").at(-1)) {
+      //   fs.rmSync(
+      //     path.join(
+      //       __dirname,
+      //       "..",
+      //       "images",
+      //       targetUser.image.split("/").at(-1) || ""
+      //     )
+      //   );
+      // }
 
-      targetUser.image = userImage.path;
+      targetUser.image = `${config.baseUrl}/images/${userImage.originalname}`;
     }
 
-    const { name: userName, email: userEmail } = targetUser;
     await targetUser.save();
-    response.status(201).json({ name: userName, email: userEmail });
+
+    const { image, name, email, _id } = targetUser;
+    const token = User.generateJWT(targetUser);
+
+    response
+      .status(201)
+      .json({ updatedImage: image, name, email, id: _id, token: token });
   } catch (error) {
     next(error);
   }

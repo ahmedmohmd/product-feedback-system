@@ -45,7 +45,7 @@ app.use(cors(corsOptions));
 app.use(upload);
 
 //* Original Routes
-app.use("/", homeRouter);
+app.use("/home", homeRouter);
 app.use("/auth", authRouter);
 app.use("/admin", adminRouter);
 app.use("/user", usersRouter);

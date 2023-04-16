@@ -12,12 +12,15 @@ router.post(
 );
 router.post("/logout", authController.postLogout);
 router.post("/reset", body("email").trim().isEmail(), authController.postReset);
+
 router.get("/reset/:resetToken", authController.getNewPassword);
+
 router.post(
   "/new-password",
   validator.validatePassword("newPassword"),
   authController.postNewPassword
 );
+
 router.post(
   "/register",
   validator.validateEmail(true),

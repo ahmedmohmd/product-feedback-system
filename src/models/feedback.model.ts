@@ -6,12 +6,10 @@ const feedbackSchema = new Schema(
     title: {
       type: String,
       required: true,
-      minLength: 10,
     },
     description: {
       type: String,
       required: true,
-      minLength: 15,
     },
     roadmap: {
       type: String,
@@ -23,9 +21,9 @@ const feedbackSchema = new Schema(
       default: ["All"],
     },
     votes: {
-      type: Number,
+      type: [String],
       required: true,
-      default: 0,
+      default: [],
     },
     comments: [
       {

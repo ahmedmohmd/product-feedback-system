@@ -1,4 +1,5 @@
-import { model, Schema } from "mongoose";
+import jwt from "jsonwebtoken";
+import { Model, Schema, model } from "mongoose";
 import isEmail from "validator/lib/isEmail";
 import passAuth from "../utils/pass-auth";
 import Comment from "./comment.model";
@@ -15,18 +16,12 @@ const userSchema = new Schema(
       type: String,
       required: true,
       trim: true,
-      validate: {
-        validator: (value) => {
-          return isEmail(value);
-        },
-        message: "Your Email is not valid!",
-      },
       unique: true,
     },
     password: {
       type: String,
       required: true,
-      minLength: 5,
+      // minLength: 5,
     },
     comments: [
       {
@@ -69,6 +64,22 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
+userSchema.statics.generateJWT = function (user) {
+  return jwt.sign(
+    {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      image: user.image,
+      role: user.role,
+    },
+    process.env.JWT_SECRET || "pYtHoNisTa",
+    {
+      expiresIn: "1h",
+    }
+  );
+};
+
 userSchema.pre("deleteOne", async function (next) {
   const user = this.getQuery();
 
@@ -87,4 +98,4 @@ userSchema.pre("deleteOne", async function (next) {
   }
 });
 
-export default model("User", userSchema);
+export default model<any, any>("User", userSchema);

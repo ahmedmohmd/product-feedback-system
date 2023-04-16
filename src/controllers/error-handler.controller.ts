@@ -4,8 +4,6 @@ const errorHandler = (error, _, response, __) => {
   const stack = process.env.NODE_ENV === "development" ? error.stack : {};
   const success = false;
 
-  console.log(error); //* Log ERROR;
-
   response.status(status).json({
     success,
     status,

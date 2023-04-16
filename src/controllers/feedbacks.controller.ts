@@ -45,7 +45,7 @@ const getSingleFeedback = async ({ params, session }, response, next) => {
 
 const postFeedback = async ({ body, user }, response, next) => {
   try {
-    const { title, description, roadmap, votes, categories } = body;
+    const { title, description, roadmap, categories } = body;
     const newTags = categories;
     newTags.push("All");
 
@@ -53,9 +53,9 @@ const postFeedback = async ({ body, user }, response, next) => {
       title,
       description,
       roadmap,
-      votes,
       categories: newTags,
       owner: user.id,
+      votes: [],
     });
 
     response.status(201).json(newFeedback);
@@ -75,7 +75,7 @@ const patchFeedback = async ({ params, body, user }, response, next) => {
 
     if (targetFeedback) {
       for (let feedback in body) {
-        if (feedback) {
+        if (feedback && feedback !== "votes") {
           targetFeedback[feedback] = body[feedback];
         }
       }

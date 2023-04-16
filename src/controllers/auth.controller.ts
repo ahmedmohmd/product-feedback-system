@@ -34,19 +34,7 @@ const postLogin = async (request, response, next) => {
       return response.status(400).json({ message: "Password is not correct!" });
     }
 
-    const token = await jwt.sign(
-      {
-        id: targetUser._id,
-        name: targetUser.name,
-        email: targetUser.email,
-        image: targetUser.image,
-        role: targetUser.role,
-      },
-      process.env.JWT_SECRET || "pYtHoNisTa",
-      {
-        expiresIn: "1h",
-      }
-    );
+    const token = User.generateJWT(targetUser);
 
     response.status(200).json({ token });
   } catch (error) {
@@ -54,9 +42,8 @@ const postLogin = async (request, response, next) => {
   }
 };
 
-const postLogout = async ({ session }, response, next) => {
+const postLogout = async (request, response, next) => {
   try {
-    await session.destroy();
     response.status(200).json({ message: "You have been logged out" });
   } catch (error) {
     next(error);
@@ -95,8 +82,10 @@ const postReset = async (request, response, next) => {
       text: "Reset Password",
       html: `
         <div style="font-family: sans-serif; font-size: 18px; border-radius: 15px;">
-          <p>Hi <b>${targetUser.name}</b> 🙂, You can reset Your Email from Link Down Below.</p> 
-          <a href="${config.baseUrl}/reset/${token}" style="background: #a855f7; padding: 10px; text-decoration: none; color: white;">Reset Password</a>
+          <p>Hi <b>${
+            targetUser.name
+          }</b> 🙂, You can reset Your Email from Link Down Below.</p> 
+          <a href="${"http://localhost:5173"}/new-password/${token}" style="background: #a855f7; padding: 10px; text-decoration: none; color: white;">Reset Password</a>
         </div>
       `,
     };
@@ -135,7 +124,7 @@ const getNewPassword = async ({ params }, response, next) => {
 
 const postNewPassword = async (request, response, next) => {
   try {
-    const { userId, newPassword, resetToken } = request.body;
+    const { newPassword, resetToken } = request.body;
 
     // validation
     const errors = validationResult(request);
@@ -145,7 +134,7 @@ const postNewPassword = async (request, response, next) => {
     }
 
     const targetUser = await User.findOne({
-      _id: userId,
+      // _id: userId,
       resetToken: resetToken,
       resetTokenExpiration: {
         $gt: Date.now(),
@@ -185,7 +174,9 @@ const postRegister = async (request, response, next) => {
       email,
       password,
       role,
-      image: `${config.baseUrl}/images/${userImage.originalname}`,
+      image: userImage
+        ? `${config.baseUrl}/images/${userImage?.originalname}`
+        : `${config.baseUrl}/images/default.png`,
     });
 
     const { name: userName, email: userEmail, image: usrImage } = newUser;

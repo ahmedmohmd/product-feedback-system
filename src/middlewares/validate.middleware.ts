@@ -32,7 +32,6 @@ const validateEmail = (custom: boolean = false) => {
 
 const validatePassword = (passwordFieldName: string = "password") => {
   return body(passwordFieldName)
-    .isStrongPassword()
     .isLength({
       max: 15,
       min: 8,
