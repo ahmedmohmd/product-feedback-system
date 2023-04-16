@@ -15,7 +15,7 @@ const getAllFeedbacks = async ({ query }, response, next) => {
     response.json({
       data: allFeedbacks
         .filter((feedback) => {
-          if (splittedTags.length === 1) {
+          if (splittedTags?.length === 1) {
             return true;
           }
 

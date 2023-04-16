@@ -82,10 +82,8 @@ const postReset = async (request, response, next) => {
       text: "Reset Password",
       html: `
         <div style="font-family: sans-serif; font-size: 18px; border-radius: 15px;">
-          <p>Hi <b>${
-            targetUser.name
-          }</b> 🙂, You can reset Your Email from Link Down Below.</p> 
-          <a href="${"http://localhost:5173"}/new-password/${token}" style="background: #a855f7; padding: 10px; text-decoration: none; color: white;">Reset Password</a>
+          <p>Hi <b>${targetUser.name}</b> 🙂, You can reset Your Email from Link Down Below.</p> 
+          <a href="${config.frontendUrl}/new-password/${token}" style="background: #a855f7; padding: 10px; text-decoration: none; color: white;">Reset Password</a>
         </div>
       `,
     };
@@ -94,6 +92,8 @@ const postReset = async (request, response, next) => {
 
     response.status(200).json({ message: "Check you email address!" });
   } catch (error) {
+    console.log(error);
+
     next(error);
   }
 };

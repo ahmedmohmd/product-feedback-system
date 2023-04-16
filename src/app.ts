@@ -27,7 +27,7 @@ app.use(express.json());
 app.use("/images", express.static(path.join(__dirname, "images")));
 
 //* CORS
-const ORIGINS: string[] = [config.frontendUrl, "*"];
+const ORIGINS: string[] = [config.frontendUrl];
 const corsOptions = {
   // origin: function (origin: any, callback: any) {
   //   const isOrigin: boolean = ORIGINS.indexOf(origin) !== -1;
@@ -55,7 +55,7 @@ app.use(notFoundRouter);
 app.use(errorHanlderRouter);
 
 //* Server Running
-const PORT = 9000;
+const PORT = 9000 || process.env.PORT;
 connect().then(() => {
   console.info("database connection established...");
   app.listen(PORT, () => console.info(`listening on port: ${PORT}...`));
