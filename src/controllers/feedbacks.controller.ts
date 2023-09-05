@@ -23,9 +23,8 @@ const getFeedbacks = async ({ user, query }, response, next) => {
   }
 };
 
-const getSingleFeedback = async ({ params, session }, response, next) => {
+const getSingleFeedback = async ({ params, user }, response, next) => {
   try {
-    const { user } = session;
     const { feedbackId } = params;
 
     const targetFeedback = await Feedback.findOne({

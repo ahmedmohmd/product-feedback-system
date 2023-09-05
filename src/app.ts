@@ -45,13 +45,13 @@ app.use(cors(corsOptions));
 app.use(upload);
 
 //* Original Routes
-app.use("/home", homeRouter);
-app.use("/auth", authRouter);
-app.use("/admin", adminRouter);
-app.use("/user", usersRouter);
-app.use("/feedbacks", feedbackRouter);
-app.use("/", commentsRouter);
-app.use(notFoundRouter);
+app.use("/api/home", homeRouter);
+app.use("/api/auth", authRouter);
+app.use("/api/admin", adminRouter);
+app.use("/api/user", usersRouter);
+app.use("/api/feedbacks", feedbackRouter);
+app.use("/api", commentsRouter);
+app.use("/api", notFoundRouter);
 app.use(errorHanlderRouter);
 
 //* Server Running

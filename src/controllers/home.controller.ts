@@ -1,3 +1,4 @@
+import Comment from "../models/comment.model";
 import Feedback from "../models/feedback.model";
 
 const getAllFeedbacks = async ({ query }, response, next) => {
@@ -58,4 +59,41 @@ const patchFeedback = async ({ params, user }, response, next) => {
   }
 };
 
-export default { getAllFeedbacks, patchFeedback };
+const getSingleFeedback = async ({ params }, response, next) => {
+  try {
+    const { feedbackId } = params;
+
+    const targetFeedback = await Feedback.findOne({
+      _id: feedbackId,
+    }).populate("comments");
+
+    if (targetFeedback) {
+      return response.status(200).json(targetFeedback);
+    }
+
+    response.status(404).json({ message: "Feedback not found!" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getComments = async ({ params }, response, next) => {
+  try {
+    const { feedbackId } = params;
+
+    const comments = await Comment.find({
+      feedback: feedbackId,
+    }).populate("author");
+
+    response.status(200).json(comments);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export default {
+  getAllFeedbacks,
+  patchFeedback,
+  getSingleFeedback,
+  getComments,
+};

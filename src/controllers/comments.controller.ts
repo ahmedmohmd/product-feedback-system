@@ -1,10 +1,9 @@
 import Comment from "../models/comment.model";
 import Feedback from "../models/feedback.model";
 
-const getComments = async ({ params, session }, response, next) => {
+const getComments = async ({ params, user }, response, next) => {
   try {
     const { feedbackId } = params;
-    const { user } = session;
 
     const comments = await Comment.find({
       feedback: feedbackId,
