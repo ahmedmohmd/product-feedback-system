@@ -46,7 +46,6 @@ const postFeedback = async ({ body, user }, response, next) => {
   try {
     const { title, description, roadmap, categories } = body;
     const newTags = categories;
-    newTags.push("All");
 
     const newFeedback = await Feedback.create({
       title,
